@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('clients', static function (Blueprint $table) {
             $table->id();
-			$table->string('first_name');
-			$table->string('last_name');
+			$table->string('first_name', 100);
+			$table->string('last_name', 100);
 			$table->string('egn', 10)->unique()->index();
             $table->timestamps();
         });

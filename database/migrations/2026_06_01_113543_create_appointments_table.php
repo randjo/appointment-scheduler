@@ -16,7 +16,7 @@ return new class extends Migration
 	        $table->foreignId('client_id')->constrained('clients');
 	        $table->dateTime('appointment_at')->index();
 	        $table->text('description')->nullable();
-	        $table->string('notification_type');
+	        $table->string('notification_type', 50);
 	        $table->timestamps();
 			$table->index(['client_id', 'appointment_at']);
         });
