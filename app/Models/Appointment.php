@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\NotificationType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,6 +17,7 @@ class Appointment extends Model
 
 	protected $casts = [
 		'appointment_at' => 'datetime',
+		'notification_type' => NotificationType::class,
 	];
 
 	public function client(): BelongsTo
@@ -31,5 +33,12 @@ class Appointment extends Model
 	public function scopeForClient($query, int $clientId)
 	{
 		return $query->where('client_id', $clientId);
+	}
+
+	public function getAppointmentAtLocalAttribute()
+	{
+		return $this->appointment_at
+			->timezone(request()->attributes->get('timezone', 'Europe/Sofia'))
+			->format('d.m.Y H:i');
 	}
 }
