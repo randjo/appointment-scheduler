@@ -47,13 +47,21 @@ class AppointmentController extends Controller
 	    }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+	/**
+	 * Display the specified resource.
+	 */
+	public function show(int $id): JsonResponse
+	{
+		$appointment = $this->service->find($id);
+		$upcomingAppointments = $this->service->upcomingForClient($appointment, 100);
+
+		return response()->json([
+			'data' => [
+				'appointment' => new AppointmentResource($appointment),
+				'upcomingAppointments' => AppointmentResource::collection($upcomingAppointments->getCollection())
+			]
+		]);
+	}
 
     /**
      * Update the specified resource in storage.

@@ -50,7 +50,7 @@ class AppointmentService
 	/**
 	 * Upcoming appointments for a client
 	 */
-	public function upcomingForClient(Appointment $appointment): LengthAwarePaginator
+	public function upcomingForClient(Appointment $appointment, int $perPage = null): LengthAwarePaginator
 	{
 		$appointment->load('client');
 		return Appointment::query()
@@ -58,7 +58,7 @@ class AppointmentService
 			->where('appointment_at', '>', now())
 			->where('id', '!=', $appointment->id)
 			->orderBy('appointment_at')
-			->paginate(10);
+			->paginate($perPage ?? 10);
 	}
 
 	public function parseToUtc($datetime): Carbon

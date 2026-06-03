@@ -17,16 +17,5 @@
 		@include('appointments._table', [
 			'appointments' => $upcomingAppointments
 		])
-
-		<div class="mt-3">
-			@forelse($upcomingAppointments as $a)
-				<div class="border p-2 mb-2 rounded">
-					<div>{{ $a->appointment_at }}</div>
-					<div class="text-sm text-gray-600">{{ $a->description }}</div>
-				</div>
-			@empty
-				<p class="text-gray-500">No upcoming appointments</p>
-			@endforelse
-		</div>
 	</div>
 @endsection
