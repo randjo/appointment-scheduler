@@ -148,6 +148,7 @@ class AppointmentWizard extends Component
 			'egn' => [
 				'required_if:client_mode,new',
 				'nullable',
+				'unique:clients,egn',
 				'digits:10',
 			],
 			'description' => ['nullable', 'string'],

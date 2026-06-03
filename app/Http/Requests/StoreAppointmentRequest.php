@@ -14,7 +14,11 @@ class StoreAppointmentRequest extends FormRequest
 		return [
 			'first_name' => 'required|string|max:100',
 			'last_name'  => 'required|string|max:100',
-			'egn'        => 'required|digits:10',
+			'egn' => [
+				'required',
+				'unique:clients,egn',
+				'digits:10',
+			],
 			'description' => 'nullable|string',
 			'notification_type' => ['required', new Enum(NotificationType::class)],
 			'appointment_at' => [
