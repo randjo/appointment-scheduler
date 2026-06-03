@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Resources\AppointmentResource;
+use App\Models\Appointment;
 use App\Services\AppointmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -62,11 +63,19 @@ class AppointmentController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+	/**
+	 * Remove the specified resource from storage.
+	 */
+	public function destroy(int $id): JsonResponse
+	{
+		if (!$appointment = Appointment::find($id)) {
+			return response()->json([
+				'message' => 'Appointment not found',
+			], 404);
+		}
+
+		$appointment->delete();
+
+		return response()->json(null, 204);
+	}
 }

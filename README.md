@@ -62,7 +62,7 @@ egn: 9001012244
 from: 2026-06-03
 to: 2026-06-30
 
-### POST /api/appointments - Store
+### POST /api/appointments - Store new appointment
 
 {
   "date": "2026-06-10", (required)
@@ -73,6 +73,8 @@ to: 2026-06-30
   "description": "Appointment description", (optional)
   "notification_type": "email" (sms|email)
 }
+
+### DELETE /api/appointments/{id} - Delete appointment by id
 
 ---
 
