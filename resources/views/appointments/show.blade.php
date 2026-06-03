@@ -14,8 +14,12 @@
 
 		<h5 class="mt-5">Upcoming appointments for this client</h5>
 
-		@include('appointments._table', [
-			'appointments' => $upcomingAppointments
-		])
+		@if(!$upcomingAppointments->empty())
+			@include('appointments._table', [
+				'appointments' => $upcomingAppointments
+			])
+		@else
+			<p class="text-gray-500">No upcoming appointments</p>
+		@endif
 	</div>
 @endsection
