@@ -83,6 +83,8 @@ to: 2026-06-30
   "notification_type": "sms" (sms|email)
 }
 
+### GET /api/appointments/{id} - Detail view for appointment with future appointments related to the client
+
 ### DELETE /api/appointments/{id} - Delete appointment by id
 
 ---
