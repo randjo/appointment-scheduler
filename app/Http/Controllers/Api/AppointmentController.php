@@ -58,10 +58,27 @@ class AppointmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+	public function update(StoreAppointmentRequest $request, int $id): JsonResponse
+	{
+		if (!$appointment = Appointment::find($id)) {
+			return response()->json([
+				'message' => 'Appointment not found',
+			], 404);
+		}
+
+		try {
+			$updated = $this->service->update($appointment, $request->validated());
+
+			return response()->json([
+				'message' => 'Appointment updated successfully',
+				'data' => new AppointmentResource($updated)
+			], 201);
+		} catch (\DomainException $e) {
+			return response()->json([
+				'message' => $e->getMessage()
+			], 422);
+		}
+	}
 
 	/**
 	 * Remove the specified resource from storage.

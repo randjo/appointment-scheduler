@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\NotificationType;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -14,13 +15,16 @@ class StoreAppointmentRequest extends FormRequest
 			'first_name' => 'required|string|max:100',
 			'last_name'  => 'required|string|max:100',
 			'egn'        => 'required|digits:10',
-			'date' => 'required',
-			'time' => [
+			'description' => 'nullable|string',
+			'notification_type' => ['required', new Enum(NotificationType::class)],
+			'appointment_at' => [
 				'required',
-				'date_format:H:i',
+				'date_format:Y-m-d H:i',
 				function ($attribute, $value, $fail) {
-					$hour = (int) explode(':', $value)[0];
-					$minute = (int) explode(':', $value)[1];
+					$dateTimeLocal = Carbon::createFromFormat('Y-m-d H:i', $value, request()->attributes->get('timezone', 'Europe/Sofia'));
+					$dateTime = $dateTimeLocal->copy()->utc();
+					$minute = (int) $dateTime->format('i');
+					$hour = (int) $dateTimeLocal->format('H');
 
 					if ($minute !== 0) {
 						$fail('Only full hours are allowed (e.g. 08:00, 09:00).');
@@ -31,9 +35,6 @@ class StoreAppointmentRequest extends FormRequest
 					}
 				},
 			],
-
-			'description' => 'nullable|string',
-			'notification_type' => ['required', new Enum(NotificationType::class)],
 		];
 	}
 }
