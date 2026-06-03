@@ -9,11 +9,9 @@ use App\Services\AppointmentService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
-use Livewire\Features\SupportRedirects\Redirector;
 
 class AppointmentWizard extends Component
 {
@@ -31,10 +29,25 @@ class AppointmentWizard extends Component
 	public array $dates = [];
 	public $times = [];
 	public Collection $clients;
+	public ?Appointment $appointment = null;
+	public bool $isEditMode = false;
+	protected AppointmentService $appointmentService;
 
-	public function mount(): void
+	public function boot(AppointmentService $appointmentService): void
 	{
-		$this->dates = app(AppointmentService::class)->getAvailableDates(now(), now()->addYear()->endOfDay());
+		$this->appointmentService = $appointmentService;
+	}
+
+	public function mount(?Appointment $appointment = null): void
+	{
+		if ($appointment) {
+			$this->appointment = $appointment;
+			$this->isEditMode = true;
+
+			$this->fillFromAppointment();
+		}
+
+		$this->dates = $this->appointmentService->getAvailableDates(now(), now()->addYear()->endOfDay(), $this->appointment?->id);
 	}
 
 	public function setClientMode($mode): void
@@ -44,8 +57,24 @@ class AppointmentWizard extends Component
 
 	public function openModal(): void
 	{
-		$this->resetWizard();
+		if (!$this->isEditMode) {
+			$this->resetWizard();
+		}
+
 		$this->showModal = true;
+	}
+
+	protected function fillFromAppointment(): void
+	{
+		$localDateTime = $this->appointment->appointment_at->timezone(request()->attributes->get('timezone', 'Europe/Sofia'));
+		$this->selectedDate = $localDateTime->format('Y-m-d');
+		$this->selectedTime = $localDateTime->format('H:i');
+		$this->client_id = $this->appointment->client->id;
+		$this->first_name = $this->appointment->client->first_name;
+		$this->last_name = $this->appointment->client->last_name;
+		$this->egn = $this->appointment->client->egn;
+		$this->description = $this->appointment->description;
+		$this->notification_type = $this->appointment->notification_type->value;
 	}
 
 	public function resetWizard(): void
@@ -69,15 +98,18 @@ class AppointmentWizard extends Component
 		$this->resetErrorBag('selectedDate');
 	}
 
-	public function goToStepTime(AppointmentService $appointmentService): void
+	public function goToStepTime(): void
 	{
 		if (!$this->selectedDate) {
 			return;
 		}
 
-		$this->times = $appointmentService->getSlotsForDate(Carbon::parse($this->selectedDate));
-		$this->selectedTime = null;
+		$this->times = $this->appointmentService->getSlotsForDate(Carbon::parse($this->selectedDate), $this->appointment?->id);
 		$this->step = 2;
+
+		if (!$this->isEditMode) {
+			$this->selectedTime = null;
+		}
 	}
 
 	public function goToStepAppointmentData(): void
@@ -138,13 +170,12 @@ class AppointmentWizard extends Component
 		];
 	}
 
-	public function createAppointment(AppointmentService $appointmentService): false|Redirector
+	public function save()
 	{
 		$validated = $this->validate();
+		$appointmentAt = $this->appointmentService->parseToUtc("$this->selectedDate $this->selectedTime");
 
-		$appointmentAt = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime, $appointmentService->tz())->utc();
-
-		if (!$appointmentService->isSlotFree($appointmentAt)) {
+		if (!$this->appointmentService->isSlotFree($appointmentAt, $this->appointment?->id)) {
 			$this->addError('selectedDate', 'This slot was just booked.');
 			$this->step = 1;
 			$this->selectedDate = null;
@@ -155,22 +186,36 @@ class AppointmentWizard extends Component
 		DB::transaction(function () use ($validated, $appointmentAt) {
 			$clientId = $this->resolveClient($validated);
 
-			Appointment::create([
-				'client_id' => $clientId,
-				'appointment_at' => $appointmentAt,
-				'description' => $validated['description'] ?? null,
-				'notification_type' => $validated['notification_type'],
-			]);
+			if ($this->isEditMode) {
+				$this->appointment->update([
+					'client_id' => $clientId,
+					'appointment_at' => $appointmentAt,
+					'description' => $validated['description'] ?? null,
+					'notification_type' => $validated['notification_type'],
+				]);
+			} else {
+				Appointment::create([
+					'client_id' => $clientId,
+					'appointment_at' => $appointmentAt,
+					'description' => $validated['description'] ?? null,
+					'notification_type' => $validated['notification_type'],
+				]);
+			}
 		});
 
 		session()->flash('success',
-			"Успешно запазихте час! Клиентът ще бъде уведомен чрез " .
-			NotificationType::from($this->notification_type)->value
+			'Успешно '
+			. ($this->isEditMode ? 'редактирахте' : 'запазихте')
+			. ' час! Клиентът ще бъде уведомен чрез '
+			. NotificationType::from($this->notification_type)->value
 		);
 
 		$this->reset();
 
-		return redirect()->route('appointments.index');
+		$queryParams = session('appointments.filters', []);
+		session(['appointments.filters' => '']);
+
+		return redirect()->route('appointments.index', $queryParams);
 	}
 
 	private function resolveClient(array $data): int

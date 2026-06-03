@@ -25,20 +25,10 @@ class Appointment extends Model
 		return $this->belongsTo(Client::class);
 	}
 
-	public function scopeUpcoming($query)
-	{
-		return $query->where('appointment_at', '>', now());
-	}
-
-	public function scopeForClient($query, int $clientId)
-	{
-		return $query->where('client_id', $clientId);
-	}
-
 	public function getAppointmentAtLocalAttribute()
 	{
 		return $this->appointment_at
 			->timezone(request()->attributes->get('timezone', 'Europe/Sofia'))
-			->format('d.m.Y H:i');
+			->format('m/d/Y H:i');
 	}
 }
