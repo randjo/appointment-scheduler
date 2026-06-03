@@ -65,13 +65,22 @@ to: 2026-06-30
 ### POST /api/appointments - Store new appointment
 
 {
-  "date": "2026-06-10", (required)
-  "time": "14:00", (required)
+  "appointment_at": "2026-06-10 14:00", (required)
   "first_name": "Ivan", (required)
   "last_name": "Petrov", (required)
   "egn": "9001011234", (required)
   "description": "Appointment description", (optional)
   "notification_type": "email" (sms|email)
+}
+
+### PUT /api/appointments/{id} - Update existing appointment
+{
+  "appointment_at": "2026-06-05 18:00",
+  "first_name": "Kiril",
+  "last_name": "Deshev",
+  "egn": "7008241234",
+  "description": "Appointment updated",
+  "notification_type": "sms" (sms|email)
 }
 
 ### DELETE /api/appointments/{id} - Delete appointment by id

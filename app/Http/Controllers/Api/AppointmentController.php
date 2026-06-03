@@ -17,15 +17,15 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): JsonResponse
-    {
-	    $filters = $request->query();
-	    $appointments = $this->service->list($filters);
+	public function index(Request $request): JsonResponse
+	{
+		$filters = $request->query();
+		$appointments = $this->service->list($filters);
 
-	    return response()->json([
-		    'data' => $appointments->items(),
-	    ]);
-    }
+		return response()->json([
+			'data' => AppointmentResource::collection($appointments->getCollection())
+		]);
+	}
 
     /**
      * Store a newly created resource in storage.
