@@ -25,7 +25,7 @@ php artisan key:generate
 php artisan migrate
 
 npm install
-npm run dev
+npm run build
 php artisan serve
 ```
 
