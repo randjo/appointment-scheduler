@@ -35,7 +35,7 @@ class AppointmentService
 					->utc());
 			})
 			->orderBy('appointment_at')
-			->paginate(10)
+			->paginate($filters['per_page'] ?? 10)
 			->withQueryString();
 	}
 

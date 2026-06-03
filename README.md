@@ -52,9 +52,17 @@ Base URL: /api
 
 ---
 
-## 📥 Example API Request
+## 📥 Example API Requests
 
-POST /api/appointments
+### GET /api/appointments - List with existing appointments
+Optional filters:
+per_page: 20
+page: 3
+egn: 9001012244
+from: 2026-06-03
+to: 2026-06-30
+
+### POST /api/appointments - Store
 
 {
   "date": "2026-06-10", (required)
