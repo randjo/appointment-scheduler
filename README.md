@@ -21,6 +21,7 @@ and **REST API**, supporting slot-based booking, client auto-creation, and timez
 ```bash
 composer install
 cp .env.example .env
+create mysql database and set its creadentials in the .env file
 php artisan key:generate
 php artisan migrate
 
