@@ -184,7 +184,7 @@ class AppointmentWizard extends Component
 		}
 
 		DB::transaction(function () use ($validated, $appointmentAt) {
-			$clientId = $this->resolveClient($validated);
+			$clientId = $this->appointmentService->resolveClient($validated);
 
 			if ($this->isEditMode) {
 				$this->appointment->update([
@@ -215,21 +215,6 @@ class AppointmentWizard extends Component
 		$queryParams = session('appointments.filters', []);
 		session(['appointments.filters' => '']);
 
-		return redirect()->route('appointments.index', $queryParams);
-	}
-
-	private function resolveClient(array $data): int
-	{
-		if ($data['client_mode'] === 'existing') {
-			return $data['client_id'];
-		}
-
-		$client = Client::create([
-			'first_name' => $data['first_name'],
-			'last_name' => $data['last_name'],
-			'egn' => $data['egn'],
-		]);
-
-		return $client->id;
+		return redirect()->route('appointments.list', $queryParams);
 	}
 }

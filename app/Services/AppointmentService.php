@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Enums\NotificationType;
 use App\Models\Appointment;
 use App\Models\Client;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentService
 {
@@ -114,16 +112,25 @@ class AppointmentService
 	{
 		$date = $date->copy()->timezone($this->tz())->startOfDay();
 
-		$start = $date->copy()->setTime(8, 0);
-		$end   = $date->copy()->setTime(19, 0);
+		$startOfDay = $date->copy()->setTime(8, 0);
+		$endOfDay   = $date->copy()->setTime(19, 0);
 
 		$slotDuration = 60;
 		$slots = [];
 
-		while ($start->lt($end)) {
+		$now = now()->timezone($this->tz());
+
+		if ($date->isToday()) {
+			$nextSlot = $now->copy()->addHour()->startOfHour();
+			$startOfDay = $nextSlot->max($startOfDay);
+		}
+
+		$start = $startOfDay;
+
+		while ($start->lt($endOfDay)) {
 			$slotEnd = $start->copy()->addMinutes($slotDuration);
 
-			if ($slotEnd->gt($end)) {
+			if ($slotEnd->gt($endOfDay)) {
 				break;
 			}
 
@@ -162,5 +169,55 @@ class AppointmentService
 			'egn' => $requestQuery['egn'] ?? null,
 			'page' => $requestQuery['from'] ?? null,
 		];
+	}
+
+	public function create(array $validated)
+	{
+		$appointmentAt = $this->parseToUtc("{$validated['selectedDate']} {$validated['selectedTime']}");
+
+		if ($appointmentAt->isPast()) {
+			throw new \DomainException('You cannot book a past time.');
+		}
+
+		if (!$this->isSlotFree($appointmentAt)) {
+			throw new \DomainException('This time slot is already taken.');
+		}
+
+		return DB::transaction(function () use ($validated, $appointmentAt) {
+			$client = $this->getClient($validated);
+
+			return Appointment::create([
+				'client_id' => $client->id,
+				'appointment_at' => $appointmentAt,
+				'description' => $validated['description'] ?? null,
+				'notification_type' => $validated['notification_type'],
+			]);
+		});
+	}
+
+	private function getClient(array $data)
+	{
+		return Client::updateOrCreate(
+			['egn' => $data['egn']],
+			[
+				'first_name' => $data['first_name'],
+				'last_name'  => $data['last_name'],
+			]
+		);
+	}
+
+	public function resolveClient(array $data): int
+	{
+		if ($data['client_mode'] === 'existing') {
+			return $data['client_id'];
+		}
+
+		$client = Client::create([
+			'first_name' => $data['first_name'],
+			'last_name' => $data['last_name'],
+			'egn' => $data['egn'],
+		]);
+
+		return $client->id;
 	}
 }

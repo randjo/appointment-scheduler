@@ -15,7 +15,7 @@
 	<div class="min-h-screen">
 		<div class="d-flex justify-content-between mb-3">
 			<h1 class="mb-4">
-				<a href="{{ route('appointments.index') }}" class="text-decoration-none text-dark">
+				<a href="{{ route('appointments.list') }}" class="text-decoration-none text-dark">
 					Appointments Scheduler
 				</a>
 			</h1>
