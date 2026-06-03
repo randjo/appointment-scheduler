@@ -55,7 +55,7 @@ Base URL: /api
 ## 📥 Example API Requests
 
 ### GET /api/appointments - List with existing appointments
-- Optional filters:
+Optional filters:
 - per_page: 20
 - page: 3
 - egn: 9001012244
@@ -71,6 +71,7 @@ Base URL: /api
   - "egn": "9001011234", (required)
   - "description": "Appointment description", (optional)
   - "notification_type": "email" (sms|email)
+
 }
 
 ### PUT /api/appointments/{id} - Update existing appointment
@@ -81,6 +82,7 @@ Base URL: /api
   - "egn": "7008241234",
   - "description": "Appointment updated",
   - "notification_type": "sms" (sms|email)
+
 }
 
 ### GET /api/appointments/{id} - Detail view for appointment with future appointments related to the client
