@@ -173,7 +173,7 @@ class AppointmentService
 
 	public function create(array $validated)
 	{
-		$appointmentAt = $this->parseToUtc("{$validated['selectedDate']} {$validated['selectedTime']}");
+		$appointmentAt = $this->parseToUtc("{$validated['date']} {$validated['time']}");
 
 		if ($appointmentAt->isPast()) {
 			throw new \DomainException('You cannot book a past time.');

@@ -22,13 +22,13 @@
 			<td>{{ $appointment->notification_type }}</td>
 			<td>
 				<a
-						href="{{ route('appointments.edit', $appointment->id) }}"
+						href="{{ route('appointment.edit', $appointment->id) }}"
 						class="btn btn-sm btn-outline-primary"
 				>
 					✏️
 				</a>
 				<a
-						href="{{ route('appointments.show', $appointment->id) }}"
+						href="{{ route('appointment.show', $appointment->id) }}"
 						class="btn btn-sm btn-outline-secondary"
 				>
 					👁️
