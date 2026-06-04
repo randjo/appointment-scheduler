@@ -71,7 +71,7 @@ Optional filters:
   - "last_name": "Petrov", (required)
   - "egn": "9001011234", (required)
   - "description": "Appointment description", (optional)
-  - "notification_type": "email" (sms|email)
+  - "notification_type": "Email" (SMS|Email)
 
 }
 
@@ -82,7 +82,7 @@ Optional filters:
   - "last_name": "Deshev",
   - "egn": "7008241234",
   - "description": "Appointment updated",
-  - "notification_type": "sms" (sms|email)
+  - "notification_type": "SMS" (SMS|Email)
 
 }
 

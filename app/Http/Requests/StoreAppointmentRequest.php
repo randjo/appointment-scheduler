@@ -16,7 +16,6 @@ class StoreAppointmentRequest extends FormRequest
 			'last_name'  => 'required|string|max:100',
 			'egn' => [
 				'required',
-				'unique:clients,egn',
 				'digits:10',
 			],
 			'description' => 'nullable|string',

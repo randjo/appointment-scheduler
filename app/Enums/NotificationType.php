@@ -4,6 +4,6 @@ namespace App\Enums;
 
 enum NotificationType: string
 {
-	case SMS = 'sms';
-	case EMAIL = 'email';
+	case SMS = 'SMS';
+	case EMAIL = 'Email';
 }

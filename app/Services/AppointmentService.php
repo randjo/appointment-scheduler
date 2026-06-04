@@ -173,22 +173,14 @@ class AppointmentService
 
 	public function create(array $validated)
 	{
-		$appointmentAt = $this->parseToUtc($validated['appointment_at']);
+		$this->validateDateTimeSlot($validated['appointment_at']);
 
-		if ($appointmentAt->isPast()) {
-			throw new \DomainException('You cannot book a past time.');
-		}
-
-		if (!$this->isSlotFree($appointmentAt)) {
-			throw new \DomainException('This time slot is already taken.');
-		}
-
-		return DB::transaction(function () use ($validated, $appointmentAt) {
-			$client = $this->getClient($validated);
+		return DB::transaction(function () use ($validated) {
+			$client = $this->updateOrCreateClient($validated);
 
 			return Appointment::create([
 				'client_id' => $client->id,
-				'appointment_at' => $appointmentAt,
+				'appointment_at' => $validated['appointment_at'],
 				'description' => $validated['description'] ?? null,
 				'notification_type' => $validated['notification_type'],
 			]);
@@ -197,18 +189,10 @@ class AppointmentService
 
 	public function update(Appointment $appointment, array $data): Appointment
 	{
-		$data['appointment_at'] = $this->parseToUtc($data['appointment_at']);
-
-		if ($data['appointment_at']->isPast()) {
-			throw new \DomainException('You cannot book a past time.');
-		}
-
-		if (!$this->isSlotFree($data['appointment_at'], $appointment->id)) {
-			throw new \DomainException('This time slot is already taken.');
-		}
+		$this->validateDateTimeSlot($data['appointment_at'], $appointment);
 
 		DB::transaction(function () use ($appointment, $data) {
-			$client = $this->getClient($data);
+			$client = $this->updateOrCreateClient($data);
 			$appointment->update([
 				'client_id' => $client->id,
 				'appointment_at' => $data['appointment_at'],
@@ -220,15 +204,17 @@ class AppointmentService
 		return $appointment->fresh(['client']);
 	}
 
-	private function getClient(array $data)
+	public function validateDateTimeSlot(&$appointmentAt, ?Appointment $appointment = null): void
 	{
-		return Client::updateOrCreate(
-			['egn' => $data['egn']],
-			[
-				'first_name' => $data['first_name'],
-				'last_name'  => $data['last_name'],
-			]
-		);
+		$appointmentAt = $this->parseToUtc($appointmentAt);
+
+		if ($appointmentAt->isPast()) {
+			throw new \DomainException('You cannot book a past time.');
+		}
+
+		if (!$this->isSlotFree($appointmentAt, $appointment?->id)) {
+			throw new \DomainException('This time slot is already taken.');
+		}
 	}
 
 	public function resolveClient(array $data): int
@@ -237,12 +223,17 @@ class AppointmentService
 			return $data['client_id'];
 		}
 
-		$client = Client::create([
-			'first_name' => $data['first_name'],
-			'last_name' => $data['last_name'],
-			'egn' => $data['egn'],
-		]);
+		return $this->updateOrCreateClient($data)->id;
+	}
 
-		return $client->id;
+	private function updateOrCreateClient(array $data)
+	{
+		return Client::updateOrCreate(
+			['egn' => $data['egn']],
+			[
+				'first_name' => $data['first_name'],
+				'last_name'  => $data['last_name'],
+			]
+		);
 	}
 }

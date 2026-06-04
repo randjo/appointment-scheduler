@@ -57,6 +57,9 @@
 								<option value="{{ $time }}">{{ $time }}</option>
 							@endforeach
 						</select>
+						@error('selectedTime')
+						<small class="text-danger">{{ $message }}</small>
+						@enderror
 					</div>
 					<div>
 						<button wire:click="$set('step', 1)"

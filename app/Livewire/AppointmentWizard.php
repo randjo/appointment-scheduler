@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
+use Livewire\Features\SupportRedirects\Redirector;
 
 class AppointmentWizard extends Component
 {
@@ -148,7 +149,6 @@ class AppointmentWizard extends Component
 			'egn' => [
 				'required_if:client_mode,new',
 				'nullable',
-				'unique:clients,egn',
 				'digits:10',
 			],
 			'description' => ['nullable', 'string'],
@@ -171,11 +171,18 @@ class AppointmentWizard extends Component
 		];
 	}
 
-	public function save()
+	public function save(): false|Redirector
 	{
 		$validated = $this->validate();
 		$appointmentAt = $this->appointmentService->parseToUtc("$this->selectedDate $this->selectedTime");
 
+		if ($appointmentAt->isPast()) {
+			$this->addError('selectedDate', 'You cannot book a past time.');
+			$this->step = 1;
+			$this->selectedDate = null;
+			$this->selectedTime = null;
+			return false;
+		}
 		if (!$this->appointmentService->isSlotFree($appointmentAt, $this->appointment?->id)) {
 			$this->addError('selectedDate', 'This slot was just booked.');
 			$this->step = 1;
