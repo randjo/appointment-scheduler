@@ -23,6 +23,8 @@
 
 		<meta name="csrf-token" content="{{ csrf_token() }}">
 
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 		@yield('content')
 
 		@if (session()->has('success'))
@@ -34,7 +36,6 @@
 	</div>
 
 	@livewireScripts
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	@vite(['resources/js/app.js'])
 </body>

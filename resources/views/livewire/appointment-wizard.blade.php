@@ -1,9 +1,8 @@
 <div>
 	<button wire:click="openModal"
-		class="px-4 py-2 bg-green-500 text-white rounded w-100">
-		@if($isEditMode)
-			Update Appointment
-		@else
+		class="{{$isEditMode ? 'hidden' : 'px-4 py-2 bg-green-500 text-white rounded w-100'}}"
+	    id="appointment-wizard-button">
+		@if(!$isEditMode)
 			Create Appointment
 		@endif
 	</button>
@@ -185,3 +184,11 @@
 		</div>
 	@endif
 </div>
+
+<script>
+	@if($isEditMode)
+		$(function () {
+			$("#appointment-wizard-button").click();
+		})
+	@endif
+</script>
