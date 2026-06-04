@@ -54,6 +54,17 @@ class AppointmentWizard extends Component
 	public function setClientMode($mode): void
 	{
 		$this->client_mode = $mode;
+
+		if ($this->isEditMode) {
+			return;
+		}
+
+		if ($this->client_mode === 'existing') {
+			$this->reset(['first_name', 'last_name', 'egn']);
+			return;
+		}
+
+		$this->client_id = null;
 	}
 
 	public function openModal(): void

@@ -12,14 +12,14 @@
 			<p><strong>Notification:</strong> {{ $appointment->notification_type->value }}</p>
 		</div>
 
-		<h5 class="mt-5">Upcoming appointments for this client</h5>
+		@if($upcomingAppointments->isNotEmpty())
+			<h5 class="mt-5">Upcoming appointments for this client</h5>
 
-		@if(!$upcomingAppointments->empty())
 			@include('appointments._table', [
 				'appointments' => $upcomingAppointments
 			])
 		@else
-			<p class="text-gray-500">No upcoming appointments</p>
+			<h5 class="mt-5">No Upcoming appointments for this client</h5>
 		@endif
 	</div>
 @endsection
